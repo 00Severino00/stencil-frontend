@@ -3,64 +3,65 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tattoo Stencil Pro Clone</title>
+    <title>Tattoo Stencil Pro v2</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         .image-container { position: relative; width: 100%; max-width: 550px; height: 550px; }
         .image-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; }
-        /* Filtros CSS para cambiar dinámicamente el color del stencil */
+        
+        /* Nuevos filtros que tiñen solo los trazos oscuros dejando el fondo blanco impecable */
         .stencil-black { filter: none; }
-        .stencil-red { filter: invert(21%) sepia(100%) saturate(7414%) hue-rotate(357deg) brightness(93%) contrast(116%); }
-        .stencil-blue { filter: invert(24%) sepia(91%) saturate(6311%) hue-rotate(228deg) brightness(95%) contrast(118%); }
-        .stencil-green { filter: invert(53%) sepia(86%) saturate(1831%) hue-rotate(106deg) brightness(101%) contrast(106%); }
+        .stencil-red { filter: matrix(1, 0, 0, 0, 0,  0, 0, 0, 0, 0,  0, 0, 0, 0, 0,  -1, 0, 0, 1, 0) hue-rotate(0deg) saturate(100%); filter: invert(19%) sepia(95%) saturate(6664%) hue-rotate(356deg) brightness(91%) contrast(115%); }
+        .stencil-blue { filter: invert(17%) sepia(96%) saturate(5463%) hue-rotate(233deg) brightness(89%) contrast(119%); }
+        .stencil-green { filter: invert(34%) sepia(74%) saturate(2251%) hue-rotate(119deg) brightness(97%) contrast(104%); }
     </style>
 </head>
 <body class="bg-gray-950 text-white min-h-screen flex flex-col items-center justify-center p-4">
 
     <div class="w-full max-w-xl bg-gray-900 p-6 rounded-3xl border border-gray-800 shadow-2xl text-center">
         <h1 class="text-3xl font-black mb-1 text-yellow-400 tracking-wider">TATTOO STENCIL PRO</h1>
-        <p class="text-gray-500 text-xs mb-6">Line-Art Avanzado y Degradé de Sombras para Tatuadores</p>
+        <p class="text-gray-500 text-xs mb-6">Líneas de Calco Limpias y Sombras por Niveles Definidos</p>
 
         <div class="mb-6">
             <label class="block w-full border-2 border-dashed border-gray-700 hover:border-yellow-400 rounded-2xl p-8 cursor-pointer transition bg-gray-950/50">
-                <span class="text-gray-400 block text-sm">Selecciona o arrastra la foto de tu cliente</span>
+                <span class="text-gray-400 block text-sm">Selecciona o arrastra tu imagen</span>
                 <input type="file" id="imageInput" accept="image/*" class="hidden" onchange="cargarImagen(event)">
             </label>
         </div>
 
         <button id="btnProcesar" onclick="procesarStencil()" class="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-950 font-black py-3.5 px-6 rounded-xl transition shadow-lg hidden">
-            CREAR STENCIL PRO ✨
+            GENERAR MATRIZ LIMPIA ⚡
         </button>
 
-        <p id="txtCargando" class="text-yellow-400 font-bold text-sm hidden animate-pulse py-2">Generando matriz y calculando sombras... (10-15s)</p>
+        <p id="txtCargando" class="text-yellow-400 font-bold text-sm hidden animate-pulse py-2">Procesando trazos de precisión... (10s)</p>
 
         <div id="editorArea" class="mt-6 hidden text-left border-t border-gray-800 pt-6">
             
-            <div class="mb-6">
-                <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Color de Línea del Stencil</label>
+            <div class="mb-6 bg-gray-950 p-4 rounded-xl border border-gray-800 text-center">
+                <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Color del Calco/Línea</label>
                 <div class="flex gap-4 justify-center">
-                    <button onclick="cambiarColor('black')" class="w-10 h-10 rounded-full bg-black border-2 border-white cursor-pointer transition hover:scale-110" title="Negro"></button>
-                    <button onclick="cambiarColor('red')" class="w-10 h-10 rounded-full bg-red-600 border border-gray-700 cursor-pointer transition hover:scale-110" title="Rojo"></button>
-                    <button onclick="cambiarColor('blue')" class="w-10 h-10 rounded-full bg-blue-600 border border-gray-700 cursor-pointer transition hover:scale-110" title="Azul"></button>
-                    <button onclick="cambiarColor('green')" class="w-10 h-10 rounded-full bg-green-500 border border-gray-700 cursor-pointer transition hover:scale-110" title="Verde"></button>
+                    <button onclick="cambiarColor('black')" class="w-10 h-10 rounded-full bg-black border-2 border-white cursor-pointer transition hover:scale-110"></button>
+                    <button onclick="cambiarColor('red')" class="w-10 h-10 rounded-full bg-red-600 border border-gray-700 cursor-pointer transition hover:scale-110"></button>
+                    <button onclick="cambiarColor('blue')" class="w-10 h-10 rounded-full bg-blue-600 border border-gray-700 cursor-pointer transition hover:scale-110"></button>
+                    <button onclick="cambiarColor('green')" class="w-10 h-10 rounded-full bg-green-500 border border-gray-700 cursor-pointer transition hover:scale-110"></button>
                 </div>
             </div>
 
-            <div class="image-container mx-auto border border-gray-800 bg-black rounded-2xl overflow-hidden shadow-inner">
+            <div class="image-container mx-auto border border-gray-800 bg-white rounded-2xl overflow-hidden shadow-inner">
                 <img id="imgStencil" class="image-layer stencil-black" alt="Resultado">
                 <img id="imgOriginal" class="image-layer pointer-events-none" alt="Original">
             </div>
 
             <div class="mt-6 bg-gray-950 p-4 rounded-xl border border-gray-800">
                 <div class="flex justify-between text-xs font-bold text-gray-400 mb-2">
-                    <span>STENCIL PURO</span>
-                    <span>VER ORIGINAL (Mezcla: <span id="valOpacidad">50</span>%)</span>
+                    <span>PLANTILLA PURA</span>
+                    <span>VER ORIGINAL (Mezcla: <span id="valOpacidad">0</span>%)</span>
                 </div>
-                <input type="range" id="opacitySlider" min="0" max="100" value="50" oninput="cambiarOpacidad(this.value)" class="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer">
+                <input type="range" id="opacitySlider" min="0" max="100" value="0" oninput="cambiarOpacidad(this.value)" class="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer">
             </div>
 
             <button onclick="descargarJPG()" class="mt-4 w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3.5 px-6 rounded-xl transition shadow-lg flex items-center justify-center gap-2">
-                Descargar Stencil Terminado (JPG)
+                Descargar Stencil de Precisión (JPG)
             </button>
         </div>
     </div>
@@ -94,9 +95,9 @@
                 const blob = await response.blob();
                 document.getElementById('imgStencil').src = URL.createObjectURL(blob);
                 document.getElementById('editorArea').classList.remove('hidden');
-                cambiarOpacidad(50);
+                cambiarOpacidad(0); // Iniciamos mostrando el stencil puro al 0% de interferencia original
             } catch (error) {
-                alert("Ocurrió un error. Revisa que el servidor esté activo.");
+                alert("Ocurrió un error. Verifica tu servidor en Render.");
                 document.getElementById('btnProcesar').classList.remove('hidden');
             } finally {
                 document.getElementById('txtCargando').classList.add('hidden');
@@ -110,10 +111,7 @@
 
         function cambiarColor(color) {
             const img = document.getElementById('imgStencil');
-            // Quitamos clases de colores anteriores
-            img.className = "image-layer";
-            // Asignamos la nueva clase de color
-            img.classList.add('stencil-' + color);
+            img.className = "image-layer stencil-" + color;
         }
 
         function descargarJPG() {
@@ -122,7 +120,7 @@
 
             const enlace = document.createElement('a');
             enlace.href = imgStencil.src;
-            enlace.download = 'stencil-profesional.jpg';
+            enlace.download = 'stencil-precision.jpg';
             document.body.appendChild(enlace);
             enlace.click();
             document.body.removeChild(enlace);
