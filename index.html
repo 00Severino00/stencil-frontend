@@ -40,15 +40,18 @@
                 <label class="block text-sm text-gray-400 mb-2 font-medium">Comparar: Foto Original vs Stencil</label>
                 <input type="range" id="opacitySlider" min="0" max="100" value="50" oninput="cambiarOpacidad(this.value)" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
             </div>
+
+            <button onclick="descargarJPG()" class="mt-6 w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-xl transition">
+                Descargar Stencil (JPG)
+            </button>
         </div>
     </div>
 
     <script>
-    // Remplaza esto con la URL que te dio Render en el Paso 3 (Asegúrate de dejar el /generate-stencil/ al final)
-    const URL_API_RENDER = "https://stencil-backend-youx.onrender.com/generate-stencil/";
+        // Tu URL de Render perfectamente configurada
+        const URL_API_RENDER = "https://stencil-backend-youx.onrender.com/generate-stencil/";
 
-    let archivoOriginal = null;
-
+        let archivoOriginal = null;
 
         function cargarImagen(event) {
             const file = event.target.files[0];
@@ -92,8 +95,19 @@
         }
 
         function cambiarOpacidad(valor) {
-            // Controla de forma interactiva la transparencia de la foto original sobre el stencil
             document.getElementById('imgOriginal').style.opacity = valor / 100;
+        }
+
+        function descargarJPG() {
+            const imgStencil = document.getElementById('imgStencil');
+            if (!imgStencil.src) return;
+
+            const enlace = document.createElement('a');
+            enlace.href = imgStencil.src;
+            enlace.download = 'mi-stencil-pro.jpg';
+            document.body.appendChild(enlace);
+            enlace.click();
+            document.body.removeChild(enlace);
         }
     </script>
 </body>
