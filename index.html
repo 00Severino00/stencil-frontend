@@ -62,4 +62,166 @@
             </div>
 
             <div class="mt-6">
-                <label class="block text-sm text-gray-400 mb-
+                <label class="block text-sm text-gray-400 mb-2 font-medium">Comparar: Foto Original vs Stencil</label>
+                <input type="range" id="opacitySlider" min="0" max="100" value="0" oninput="cambiarOpacidad(this.value)" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+            </div>
+
+            <button id="btnRenderHD" onclick="optimizarCalidadHD()" class="mt-6 w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-xl transition shadow-lg flex items-center justify-center gap-2">
+                ✨ Renderizar y Suavizar Líneas (Alta Calidad HD)
+            </button>
+
+            <button onclick="descargarJPG()" class="mt-3 w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-xl transition">
+                Descargar Stencil de Alta Calidad (JPG)
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const URL_API_RENDER = "https://stencil-backend-youx.onrender.com/generate-stencil/";
+        const URL_API_HD = "https://stencil-backend-youx.onrender.com/render-hd/";
+        let archivoOriginal = null;
+        let blobActualStencil = null;
+        let colorActual = 'black';
+
+        // Pre-cargamos el logo globalmente para evitar que trabe las funciones
+        const logoSvgGlobal = new Image();
+        logoSvgGlobal.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" fill="none" stroke="black" stroke-width="25"><path d="M400 250 L150 650 L320 650 L400 500 L480 650 L650 650 Z"/><path d="M320 650 Q400 560 480 650 Q400 720 320 650 Z"/></svg>';
+
+        function cargarImagen(event) {
+            const file = event.target.files[0];
+            if (file) {
+                archivoOriginal = file;
+                document.getElementById('imgOriginal').src = URL.createObjectURL(file);
+                document.getElementById('btnProcesar').classList.remove('hidden');
+                document.getElementById('editorArea').classList.add('hidden');
+            }
+        }
+
+        async function procesarStencil() {
+            if (!archivoOriginal) return;
+            document.getElementById('btnProcesar').classList.add('hidden');
+            document.getElementById('txtCargando').classList.remove('hidden');
+
+            const formData = new FormData();
+            formData.append('file', archivoOriginal);
+
+            try {
+                const response = await fetch(URL_API_RENDER, { method: 'POST', body: formData });
+                if (!response.ok) throw new Error("Error");
+
+                blobActualStencil = await response.blob();
+                document.getElementById('imgStencil').src = URL.createObjectURL(blobActualStencil);
+                
+                document.getElementById('editorArea').classList.remove('hidden');
+                
+                // Reiniciar estado de botón HD por si procesa una segunda foto
+                const btn = document.getElementById('btnRenderHD');
+                btn.innerHTML = "✨ Renderizar y Suavizar Líneas (Alta Calidad HD)";
+                btn.disabled = false;
+                btn.className = "mt-6 w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-xl transition shadow-lg flex items-center justify-center gap-2";
+                
+                cambiarColor('black');
+                cambiarOpacidad(0);
+            } catch (error) {
+                alert("Error al conectar con el servidor.");
+                document.getElementById('btnProcesar').classList.remove('hidden');
+            } finally {
+                document.getElementById('txtCargando').classList.add('hidden');
+            }
+        }
+
+        async function optimizarCalidadHD() {
+            if (!blobActualStencil) return;
+            const btn = document.getElementById('btnRenderHD');
+            btn.innerHTML = "🌀 Renderizando curvas vectoriales...";
+            btn.disabled = true;
+
+            const formData = new FormData();
+            formData.append('file', blobActualStencil, 'stencil.png');
+
+            try {
+                const response = await fetch(URL_API_HD, { method: 'POST', body: formData });
+                if (!response.ok) throw new Error("Error");
+
+                blobActualStencil = await response.blob();
+                document.getElementById('imgStencil').src = URL.createObjectURL(blobActualStencil);
+                btn.innerHTML = "✅ ¡Líneas HD Renderizadas con Éxito!";
+                btn.classList.replace('bg-purple-600', 'bg-indigo-700');
+            } catch (e) {
+                alert("No se pudo optimizar.");
+                btn.innerHTML = "✨ Renderizar y Suavizar Líneas (Alta Calidad HD)";
+                btn.disabled = false;
+            }
+        }
+
+        function cambiarOpacidad(valor) {
+            document.getElementById('imgOriginal').style.opacity = valor / 100;
+        }
+
+        function cambiarColor(color) {
+            colorActual = color;
+            const tint = document.getElementById('tintLayer');
+            if (color === 'black') {
+                tint.style.display = 'none';
+            } else {
+                tint.style.display = 'block';
+                if (color === 'red') tint.style.backgroundColor = 'rgb(220, 38, 38)';
+                if (color === 'blue') tint.style.backgroundColor = 'rgb(37, 99, 235)';
+                if (color === 'green') tint.style.backgroundColor = 'rgb(34, 197, 94)';
+            }
+        }
+
+        function descargarJPG() {
+            const img = document.getElementById('imgStencil');
+            if (!img.src) return;
+
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            const tempImg = new Image();
+            tempImg.src = img.src;
+            tempImg.onload = function() {
+                canvas.width = tempImg.naturalWidth;
+                canvas.height = tempImg.naturalHeight;
+
+                // 1. Fondo Blanco
+                ctx.fillStyle = 'white';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                // 2. Estampar marca de agua pre-cargada
+                const tamañoLogo = canvas.width * 0.35; 
+                const x = (canvas.width - tamañoLogo) / 2;
+                const y = (canvas.height - (tamañoLogo * 1.25)) / 2;
+                
+                ctx.save();
+                ctx.globalAlpha = 0.06;
+                ctx.drawImage(logoSvgGlobal, x, y, tamañoLogo, tamañoLogo * 1.25);
+                ctx.restore();
+
+                // 3. Dibujar líneas del Stencil (Negro)
+                ctx.drawImage(tempImg, 0, 0);
+
+                // 4. Teñir el color si no es negro
+                if (colorActual !== 'black') {
+                    ctx.save();
+                    ctx.globalCompositeOperation = 'source-atop';
+                    if (colorActual === 'red') ctx.fillStyle = 'rgb(220, 38, 38)';
+                    if (colorActual === 'blue') ctx.fillStyle = 'rgb(37, 99, 235)';
+                    if (colorActual === 'green') ctx.fillStyle = 'rgb(34, 197, 94)';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.restore();
+                }
+
+                // 5. Descarga directa limpia compatible con galería móvil
+                const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
+                const enlace = document.createElement('a');
+                enlace.href = dataUrl;
+                enlace.download = 'stencil-hd-galeria.jpg';
+                document.body.appendChild(enlace);
+                enlace.click();
+                document.body.removeChild(enlace);
+            };
+        }
+    </script>
+</body>
+</html>
