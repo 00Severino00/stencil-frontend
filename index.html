@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tattoo Stencil Pro Clone</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        /* Estilo para centrar las imágenes una sobre otra */
+        .image-container { position: relative; width: 100%; max-width: 500px; height: 500px; }
+        .image-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; }
+    </style>
+</head>
+<body class="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center p-4">
+
+    <div class="w-full max-w-xl bg-gray-800 p-6 rounded-2xl shadow-xl text-center">
+        <h1 class="text-3xl font-black mb-2 text-yellow-400">TATTOO STENCIL PRO</h1>
+        <p class="text-gray-400 text-sm mb-6">Convierte cualquier foto en una plantilla para tatuar instantáneamente</p>
+
+        <div class="mb-6">
+            <label class="block w-full border-2 border-dashed border-gray-600 hover:border-yellow-400 rounded-xl p-8 cursor-pointer transition">
+                <span class="text-gray-400">Click para seleccionar o arrastrar foto</span>
+                <input type="file" id="imageInput" accept="image/*" class="hidden" onchange="cargarImagen(event)">
+            </label>
+        </div>
+
+        <button id="btnProcesar" onclick="procesarStencil()" class="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 px-6 rounded-xl transition hidden">
+            Generar Plantilla (Stencil)
+        </button>
+
+        <p id="txtCargando" class="text-yellow-400 font-semibold hidden animate-pulse">Procesando imagen... (puede tardar 15s)</p>
+
+        <div id="editorArea" class="mt-8 hidden">
+            <div class="image-container mx-auto border border-gray-700 bg-black rounded-xl overflow-hidden">
+                <img id="imgStencil" class="image-layer" alt="Resultado">
+                <img id="imgOriginal" class="image-layer" alt="Original">
+            </div>
+
+            <div class="mt-6">
+                <label class="block text-sm text-gray-400 mb-2 font-medium">Comparar: Foto Original vs Stencil</label>
+                <input type="range" id="opacitySlider" min="0" max="100" value="50" oninput="cambiarOpacidad(this.value)" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Remplaza esto con la URL que te dio Render en el Paso 3 (Asegúrate de dejar el /generate-stencil/ al final)
+        const URL_API_RENDER = "https://stencil-backend-youx.onrender.com";
+
+        let archivoOriginal = null;
+
+        function cargarImagen(event) {
+            const file = event.target.files[0];
+            if (file) {
+                archivoOriginal = file;
+                document.getElementById('imgOriginal').src = URL.createObjectURL(file);
+                document.getElementById('btnProcesar').classList.remove('hidden');
+                document.getElementById('editorArea').classList.add('hidden');
+            }
+        }
+
+        async function procesarStencil() {
+            if (!archivoOriginal) return;
+
+            document.getElementById('btnProcesar').classList.add('hidden');
+            document.getElementById('txtCargando').classList.remove('hidden');
+
+            const formData = new FormData();
+            formData.append('file', archivoOriginal);
+
+            try {
+                const response = await fetch(URL_API_RENDER, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) throw new Error("Error en el servidor");
+
+                const blob = await response.blob();
+                document.getElementById('imgStencil').src = URL.createObjectURL(blob);
+                
+                // Mostrar el editor interactivo
+                document.getElementById('editorArea').classList.remove('hidden');
+                cambiarOpacidad(50); // Iniciar al 50% de mezcla
+            } catch (error) {
+                alert("Hubo un error al procesar tu stencil. Inténtalo de nuevo.");
+                document.getElementById('btnProcesar').classList.remove('hidden');
+            } finally {
+                document.getElementById('txtCargando').classList.add('hidden');
+            }
+        }
+
+        function cambiarOpacidad(valor) {
+            // Controla de forma interactiva la transparencia de la foto original sobre el stencil
+            document.getElementById('imgOriginal').style.opacity = valor / 100;
+        }
+    </script>
+</body>
+</html>
