@@ -26,7 +26,7 @@
 
     <div class="w-full max-w-xl bg-gray-800 p-6 rounded-2xl shadow-xl text-center">
         <h1 class="text-3xl font-black mb-2 text-yellow-400">TATTOO LINE-ART PRO</h1>
-        <p class="text-gray-400 text-sm mb-6">Extracción estricta de líneas de contorno y dibujo</p>
+        <p class="text-gray-400 text-sm mb-6">Estilógrafo Digital para Plantillas de Tatuaje</p>
 
         <div class="mb-6">
             <label class="block w-full border-2 border-dashed border-gray-600 hover:border-yellow-400 rounded-xl p-8 cursor-pointer transition">
@@ -37,23 +37,23 @@
 
         <div id="toleranceControl" class="mb-6 bg-gray-950 p-4 rounded-xl border border-gray-700 hidden">
             <div class="flex justify-between text-xs font-bold text-gray-400 mb-2">
-                <span>SÓLO LÍNEAS FUERTES</span>
-                <span>CANTIDAD DE DETALLES: <span id="valTolerancia">10</span></span>
-                <span>CAPTAR TODO</span>
+                <span>TRAZO FINO (0.2mm)</span>
+                <span>PRESIÓN DEL PINCEL: <span id="valTolerancia">10</span></span>
+                <span>TRAZO FUERTE (0.8mm)</span>
             </div>
-            <input type="range" id="toleranceSlider" min="1" max="20" value="10" onchange="siCambiaTolerancia()" class="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer">
+            <input type="range" id="toleranceSlider" min="2" max="25" value="10" onchange="siCambiaTolerancia()" class="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer">
         </div>
 
         <button id="btnProcesar" onclick="procesarStencil()" class="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 px-6 rounded-xl transition hidden">
-            Extraer Line Art Puro ⚡
+            Trazar con Estilógrafo Pro 🖋️
         </button>
 
-        <p id="txtCargando" class="text-yellow-400 font-semibold hidden animate-pulse">Buscando trazos y bordes estructurales...</p>
+        <p id="txtCargando" class="text-yellow-400 font-semibold hidden animate-pulse">Dibujando líneas fluidas estilizadas...</p>
 
         <div id="editorArea" class="mt-8 hidden text-left">
             
             <div class="mb-6 text-center">
-                <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Color del Calco</label>
+                <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Color de la Tinta</label>
                 <div class="flex gap-4 justify-center">
                     <button onclick="cambiarColor('black')" class="w-10 h-10 rounded-full bg-black border-2 border-white cursor-pointer"></button>
                     <button onclick="cambiarColor('red')" class="w-10 h-10 rounded-full bg-red-600 border border-gray-700 cursor-pointer"></button>
@@ -70,12 +70,12 @@
             </div>
 
             <div class="mt-6">
-                <label class="block text-sm text-gray-400 mb-2 font-medium">Comparar: Foto Original vs Line Art</label>
+                <label class="block text-sm text-gray-400 mb-2 font-medium">Comparar: Original vs Trazado</label>
                 <input type="range" id="opacitySlider" min="0" max="100" value="0" oninput="cambiarOpacidad(this.value)" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
             </div>
 
             <button id="btnRenderHD" onclick="optimizarCalidadHD()" class="mt-6 w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-xl transition shadow-lg flex items-center justify-center gap-2">
-                ✨ Renderizar y Suavizar Curvas Vectoriales (HD)
+                ✨ Renderizar y Suavizar Curvas Estilo Procreate
             </button>
 
             <button onclick="descargarJPG()" class="mt-3 w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-xl transition">
@@ -134,7 +134,7 @@
                 document.getElementById('editorArea').classList.remove('hidden');
                 
                 const btn = document.getElementById('btnRenderHD');
-                btn.innerHTML = "✨ Renderizar y Suavizar Curvas Vectoriales (HD)";
+                btn.innerHTML = "✨ Renderizar y Suavizar Curvas Estilo Procreate";
                 btn.disabled = false;
                 btn.className = "mt-6 w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-xl transition shadow-lg flex items-center justify-center gap-2";
                 
@@ -151,7 +151,7 @@
         async function optimizarCalidadHD() {
             if (!blobActualStencil) return;
             const btn = document.getElementById('btnRenderHD');
-            btn.innerHTML = "🌀 Renderizando curvas vectoriales...";
+            btn.innerHTML = "🌀 Suavizando bordes con anti-aliasing...";
             btn.disabled = true;
 
             const formData = new FormData();
@@ -163,11 +163,11 @@
 
                 blobActualStencil = await response.blob();
                 document.getElementById('imgStencil').src = URL.createObjectURL(blobActualStencil);
-                btn.innerHTML = "✅ ¡Líneas HD Vectorizadas!";
+                btn.innerHTML = "✅ ¡Trazo Pulido HD de Alta Fidelidad!";
                 btn.classList.replace('bg-purple-600', 'bg-indigo-700');
             } catch (e) {
                 alert("No se pudo optimizar.");
-                btn.innerHTML = "✨ Renderizar y Suavizar Curvas Vectoriales (HD)";
+                btn.innerHTML = "✨ Renderizar y Suavizar Curvas Estilo Procreate";
                 btn.disabled = false;
             }
         }
@@ -229,7 +229,7 @@
                 const dataUrl = canvas.toDataURL('image/jpeg', 0.95);
                 const enlace = document.createElement('a');
                 enlace.href = dataUrl;
-                enlace.download = 'lineart-hd-galeria.jpg';
+                enlace.download = 'lineart-estilografo.jpg';
                 document.body.appendChild(enlace);
                 enlace.click();
                 document.body.removeChild(enlace);
