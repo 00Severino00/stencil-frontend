@@ -3,45 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tattoo Line-Art Pro V4</title>
+    <title>Tattoo Stencil Pro</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         .image-container { position: relative; width: 100%; max-width: 500px; height: 500px; background-color: white; }
-        .image-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; z-index: 10; }
-        #tintLayer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; mix-blend-mode: screen; pointer-events: none; display: none; z-index: 15; }
+        .image-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; }
+        
+        /* Capa especial para tintar las líneas sin dañar el fondo blanco */
+        #tintLayer {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            mix-blend-mode: screen; pointer-events: none; display: none;
+        }
     </style>
 </head>
 <body class="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center p-4">
 
     <div class="w-full max-w-xl bg-gray-800 p-6 rounded-2xl shadow-xl text-center">
-        <h1 class="text-3xl font-black mb-2 text-yellow-400">TATTOO LINE-ART PRO</h1>
-        <p class="text-gray-400 text-sm mb-6">Extracción Vectorial de Contornos y Trazos</p>
+        <h1 class="text-3xl font-black mb-2 text-yellow-400">TATTOO STENCIL PRO</h1>
+        <p class="text-gray-400 text-sm mb-6">Líneas de calco puras de alta definición</p>
 
         <div class="mb-6">
             <label class="block w-full border-2 border-dashed border-gray-600 hover:border-yellow-400 rounded-xl p-8 cursor-pointer transition">
-                <span class="text-gray-400">Seleccionar o soltar diseño gráfico</span>
+                <span class="text-gray-400">Click para seleccionar o arrastrar foto</span>
                 <input type="file" id="imageInput" accept="image/*" class="hidden" onchange="cargarImagen(event)">
             </label>
         </div>
 
-        <div id="toleranceControl" class="mb-6 bg-gray-950 p-4 rounded-xl border border-gray-700 hidden">
-            <div class="flex justify-between text-xs font-bold text-gray-400 mb-2">
-                <span>TRAZO MÁS DETALLADO</span>
-                <span>FILTRO DE PRECISIÓN: <span id="valTolerancia">30</span></span>
-                <span>SOLO LÍNEAS MAESTRAS</span>
-            </div>
-            <input type="range" id="toleranceSlider" min="10" max="50" step="1" value="30" onchange="siCambiaTolerancia()" class="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer">
-        </div>
-
         <button id="btnProcesar" onclick="procesarStencil()" class="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 px-6 rounded-xl transition hidden">
-            Generar Plantilla Limpia 🖋️
+            Generar Plantilla (Stencil)
         </button>
 
-        <p id="txtCargando" class="text-yellow-400 font-semibold hidden animate-pulse">Aislando contornos y limpiando fondo...</p>
+        <p id="txtCargando" class="text-yellow-400 font-semibold hidden animate-pulse">Procesando líneas... (unos segundos)</p>
 
         <div id="editorArea" class="mt-8 hidden text-left">
+            
             <div class="mb-6 text-center">
-                <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Color de la Tinta del Calco</label>
+                <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Color de Línea del Stencil</label>
                 <div class="flex gap-4 justify-center">
                     <button onclick="cambiarColor('black')" class="w-10 h-10 rounded-full bg-black border-2 border-white cursor-pointer"></button>
                     <button onclick="cambiarColor('red')" class="w-10 h-10 rounded-full bg-red-600 border border-gray-700 cursor-pointer"></button>
@@ -53,30 +50,23 @@
             <div class="image-container mx-auto border border-gray-700 rounded-xl overflow-hidden">
                 <img id="imgStencil" class="image-layer" alt="Resultado">
                 <div id="tintLayer"></div>
-                <img id="imgOriginal" class="image-layer" alt="Original" style="z-index: 20;">
+                <img id="imgOriginal" class="image-layer" alt="Original">
             </div>
 
             <div class="mt-6">
-                <label class="block text-sm text-gray-400 mb-2 font-medium">Superposición (Original vs Calco)</label>
+                <label class="block text-sm text-gray-400 mb-2 font-medium">Comparar: Foto Original vs Stencil</label>
                 <input type="range" id="opacitySlider" min="0" max="100" value="0" oninput="cambiarOpacidad(this.value)" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
             </div>
 
-            <button id="btnRenderHD" onclick="optimizarCalidadHD()" class="mt-6 w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-xl transition shadow-lg">
-                ✨ Eliminar Pixelado (Suavizado HD)
-            </button>
-
-            <button onclick="descargarJPG()" class="mt-3 w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-xl transition">
-                Descargar Plantilla Perfecta (JPG)
+            <button onclick="descargarJPG()" class="mt-6 w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-xl transition">
+                Descargar Stencil (JPG)
             </button>
         </div>
     </div>
 
     <script>
         const URL_API_RENDER = "https://stencil-backend-youx.onrender.com/generate-stencil/";
-        const URL_API_HD = "https://stencil-backend-youx.onrender.com/render-hd/";
         let archivoOriginal = null;
-        let blobActualStencil = null;
-        let colorActual = 'black';
 
         function cargarImagen(event) {
             const file = event.target.files[0];
@@ -84,65 +74,34 @@
                 archivoOriginal = file;
                 document.getElementById('imgOriginal').src = URL.createObjectURL(file);
                 document.getElementById('btnProcesar').classList.remove('hidden');
-                document.getElementById('toleranceControl').classList.remove('hidden');
                 document.getElementById('editorArea').classList.add('hidden');
-            }
-        }
-
-        function siCambiaTolerancia() {
-            const val = document.getElementById('toleranceSlider').value;
-            document.getElementById('valTolerancia').innerText = val;
-            if(!document.getElementById('editorArea').classList.contains('hidden')) {
-                procesarStencil();
             }
         }
 
         async function procesarStencil() {
             if (!archivoOriginal) return;
+
             document.getElementById('btnProcesar').classList.add('hidden');
             document.getElementById('txtCargando').classList.remove('hidden');
 
-            const toleranciaSeleccionada = document.getElementById('toleranceSlider').value;
             const formData = new FormData();
             formData.append('file', archivoOriginal);
-            formData.append('tolerance', toleranciaSeleccionada);
 
             try {
                 const response = await fetch(URL_API_RENDER, { method: 'POST', body: formData });
-                if (!response.ok) throw new Error();
+                if (!response.ok) throw new Error("Error");
 
-                blobActualStencil = await response.blob();
-                document.getElementById('imgStencil').src = URL.createObjectURL(blobActualStencil);
+                const blob = await response.blob();
+                document.getElementById('imgStencil').src = URL.createObjectURL(blob);
+                
                 document.getElementById('editorArea').classList.remove('hidden');
-                cambiarColor(colorActual);
+                cambiarColor('black'); // Por defecto negro
                 cambiarOpacidad(0);
             } catch (error) {
-                alert("Error al conectar. Espera 5 segundos a que el servidor aplique los cambios.");
+                alert("Error al conectar con Render. Revisa tu panel.");
                 document.getElementById('btnProcesar').classList.remove('hidden');
             } finally {
                 document.getElementById('txtCargando').classList.add('hidden');
-            }
-        }
-
-        async function optimizarCalidadHD() {
-            if (!blobActualStencil) return;
-            const btn = document.getElementById('btnRenderHD');
-            btn.innerHTML = "🌀 Suavizando bordes artísticos...";
-            btn.disabled = true;
-
-            const formData = new FormData();
-            formData.append('file', blobActualStencil, 'stencil.png');
-
-            try {
-                const response = await fetch(URL_API_HD, { method: 'POST', body: formData });
-                if (response.ok) {
-                    blobActualStencil = await response.blob();
-                    document.getElementById('imgStencil').src = URL.createObjectURL(blobActualStencil);
-                    btn.innerHTML = "✅ ¡Líneas Técnicas Listas!";
-                }
-            } catch (e) {
-                btn.innerHTML = "✨ Eliminar Pixelado (Suavizado HD)";
-                btn.disabled = false;
             }
         }
 
@@ -151,12 +110,12 @@
         }
 
         function cambiarColor(color) {
-            colorActual = color;
             const tint = document.getElementById('tintLayer');
             if (color === 'black') {
                 tint.style.display = 'none';
             } else {
                 tint.style.display = 'block';
+                // Colores RGB exactos para tintar sobre las líneas negras
                 if (color === 'red') tint.style.backgroundColor = 'rgb(220, 38, 38)';
                 if (color === 'blue') tint.style.backgroundColor = 'rgb(37, 99, 235)';
                 if (color === 'green') tint.style.backgroundColor = 'rgb(34, 197, 94)';
@@ -167,35 +126,12 @@
             const img = document.getElementById('imgStencil');
             if (!img.src) return;
 
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            const tempImg = new Image();
-            tempImg.src = img.src;
-            tempImg.onload = function() {
-                canvas.width = tempImg.naturalWidth;
-                canvas.height = tempImg.naturalHeight;
-                ctx.fillStyle = 'white';
-                ctx.fillRect(0, 0, canvas.width, canvas.height);
-                ctx.drawImage(tempImg, 0, 0);
-
-                if (colorActual !== 'black') {
-                    ctx.save();
-                    ctx.globalCompositeOperation = 'source-atop';
-                    if (colorActual === 'red') ctx.fillStyle = 'rgb(220, 38, 38)';
-                    if (colorActual === 'blue') ctx.fillStyle = 'rgb(37, 99, 235)';
-                    if (colorActual === 'green') ctx.fillStyle = 'rgb(34, 197, 94)';
-                    ctx.fillRect(0, 0, canvas.width, canvas.height);
-                    ctx.restore();
-                }
-
-                const dataUrl = canvas.toDataURL('image/jpeg', 0.98);
-                const enlace = document.createElement('a');
-                enlace.href = dataUrl;
-                enlace.download = 'stencil-tecnico.jpg';
-                document.body.appendChild(enlace);
-                enlace.click();
-                document.body.removeChild(enlace);
-            };
+            const enlace = document.createElement('a');
+            enlace.href = img.src;
+            enlace.download = 'mi-stencil-perfecto.jpg';
+            document.body.appendChild(enlace);
+            enlace.click();
+            document.body.removeChild(enlace);
         }
     </script>
 </body>
