@@ -8,52 +8,40 @@
     <style>
         .image-container { position: relative; width: 100%; max-width: 500px; height: 500px; background-color: white; }
         .image-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; z-index: 10; }
-        
-        .watermark-layer {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" fill="none" stroke="black" stroke-width="25" stroke-linecap="round" stroke-linejoin="round"><path d="M400 250 L150 650 L320 650 L400 500 L480 650 L650 650 Z"/><path d="M320 650 Q400 560 480 650 Q400 720 320 650 Z"/></svg>');
-            background-repeat: no-repeat; background-position: center; background-size: 40%;
-            opacity: 0.03; pointer-events: none; z-index: 5;
-        }
-
-        #tintLayer {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            mix-blend-mode: screen; pointer-events: none; display: none; z-index: 15;
-        }
+        #tintLayer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; mix-blend-mode: screen; pointer-events: none; display: none; z-index: 15; }
     </style>
 </head>
 <body class="bg-gray-900 text-white min-h-screen flex flex-col items-center justify-center p-4">
 
     <div class="w-full max-w-xl bg-gray-800 p-6 rounded-2xl shadow-xl text-center">
         <h1 class="text-3xl font-black mb-2 text-yellow-400">TATTOO LINE-ART PRO</h1>
-        <p class="text-gray-400 text-sm mb-6">Estilógrafo Avanzado de Precisión Artística</p>
+        <p class="text-gray-400 text-sm mb-6">Estilógrafo de Precisión para Contornos Libres</p>
 
         <div class="mb-6">
             <label class="block w-full border-2 border-dashed border-gray-600 hover:border-yellow-400 rounded-xl p-8 cursor-pointer transition">
-                <span class="text-gray-400">Click para seleccionar o arrastrar foto</span>
+                <span class="text-gray-400">Click para seleccionar foto</span>
                 <input type="file" id="imageInput" accept="image/*" class="hidden" onchange="cargarImagen(event)">
             </label>
         </div>
 
         <div id="toleranceControl" class="mb-6 bg-gray-950 p-4 rounded-xl border border-gray-700 hidden">
             <div class="flex justify-between text-xs font-bold text-gray-400 mb-2">
-                <span>TRAZO ULTRA-FINO</span>
+                <span>ESTILÓGRAFO FINO</span>
                 <span>GROSOR DE LÍNEA: <span id="valTolerancia">15</span></span>
-                <span>TRAZO GRUESO SÓLIDO</span>
+                <span>ESTILÓGRAFO GRUESO</span>
             </div>
-            <input type="range" id="toleranceSlider" min="5" max="40" value="15" onchange="siCambiaTolerancia()" class="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer">
+            <input type="range" id="toleranceSlider" min="5" max="35" value="15" onchange="siCambiaTolerancia()" class="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer">
         </div>
 
         <button id="btnProcesar" onclick="procesarStencil()" class="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 px-6 rounded-xl transition hidden">
-            Trazar con Pulso Técnico 🖋️
+            Dibujar Lineart 🖋️
         </button>
 
-        <p id="txtCargando" class="text-yellow-400 font-semibold hidden animate-pulse">Aislando líneas artísticas y suavizando curvas...</p>
+        <p id="txtCargando" class="text-yellow-400 font-semibold hidden animate-pulse">Conectando y trazando bordes...</p>
 
         <div id="editorArea" class="mt-8 hidden text-left">
-            
             <div class="mb-6 text-center">
-                <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Color de la Tinta</label>
+                <label class="block text-xs font-bold text-gray-400 uppercase mb-2">Color del Calco</label>
                 <div class="flex gap-4 justify-center">
                     <button onclick="cambiarColor('black')" class="w-10 h-10 rounded-full bg-black border-2 border-white cursor-pointer"></button>
                     <button onclick="cambiarColor('red')" class="w-10 h-10 rounded-full bg-red-600 border border-gray-700 cursor-pointer"></button>
@@ -63,23 +51,22 @@
             </div>
 
             <div class="image-container mx-auto border border-gray-700 rounded-xl overflow-hidden">
-                <div class="watermark-layer"></div>
                 <img id="imgStencil" class="image-layer" alt="Resultado">
                 <div id="tintLayer"></div>
                 <img id="imgOriginal" class="image-layer" alt="Original" style="z-index: 20;">
             </div>
 
             <div class="mt-6">
-                <label class="block text-sm text-gray-400 mb-2 font-medium">Comparar: Foto Original vs Line Art</label>
+                <label class="block text-sm text-gray-400 mb-2 font-medium">Original vs Line Art</label>
                 <input type="range" id="opacitySlider" min="0" max="100" value="0" oninput="cambiarOpacidad(this.value)" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
             </div>
 
-            <button id="btnRenderHD" onclick="optimizarCalidadHD()" class="mt-6 w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-xl transition shadow-lg flex items-center justify-center gap-2">
-                ✨ Pulir Bordes y Definir Curvas
+            <button id="btnRenderHD" onclick="optimizarCalidadHD()" class="mt-6 w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-xl transition shadow-lg">
+                ✨ Limpiar Trazado Definitivo
             </button>
 
             <button onclick="descargarJPG()" class="mt-3 w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-xl transition">
-                Descargar Plantilla Limpia (JPG)
+                Descargar Plantilla (JPG)
             </button>
         </div>
     </div>
@@ -90,9 +77,6 @@
         let archivoOriginal = null;
         let blobActualStencil = null;
         let colorActual = 'black';
-
-        const logoSvgGlobal = new Image();
-        logoSvgGlobal.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1000" fill="none" stroke="black" stroke-width="25"><path d="M400 250 L150 650 L320 650 L400 500 L480 650 L650 650 Z"/><path d="M320 650 Q400 560 480 650 Q400 720 320 650 Z"/></svg>';
 
         function cargarImagen(event) {
             const file = event.target.files[0];
@@ -119,38 +103,41 @@
             document.getElementById('txtCargando').classList.remove('hidden');
 
             const toleranciaSeleccionada = document.getElementById('toleranceSlider').value;
-
             const formData = new FormData();
             formData.append('file', archivoOriginal);
             formData.append('tolerance', toleranciaSeleccionada);
 
-            try {
-                const response = await fetch(URL_API_RENDER, { method: 'POST', body: formData });
-                if (!response.ok) throw new Error("Error");
+            // Reintentos automáticos si Render está despertando
+            let exitoso = false;
+            for (let i = 0; i < 3; i++) {
+                try {
+                    const response = await fetch(URL_API_RENDER, { method: 'POST', body: formData });
+                    if (response.ok) {
+                        blobActualStencil = await response.blob();
+                        document.getElementById('imgStencil').src = URL.createObjectURL(blobActualStencil);
+                        document.getElementById('editorArea').classList.remove('hidden');
+                        cambiarColor(colorActual);
+                        cambiarOpacidad(0);
+                        exitoso = true;
+                        break;
+                    }
+                } catch (error) {
+                    console.log("Reintentando conexión...");
+                }
+                await new Promise(r => setTimeout(r, 3000));
+            }
 
-                blobActualStencil = await response.blob();
-                document.getElementById('imgStencil').src = URL.createObjectURL(blobActualStencil);
-                document.getElementById('editorArea').classList.remove('hidden');
-                
-                const btn = document.getElementById('btnRenderHD');
-                btn.innerHTML = "✨ Pulir Bordes y Definir Curvas";
-                btn.disabled = false;
-                btn.className = "mt-6 w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-xl transition shadow-lg flex items-center justify-center gap-2";
-                
-                cambiarColor(colorActual);
-                cambiarOpacidad(0);
-            } catch (error) {
-                alert("Conectando con el servidor...");
+            document.getElementById('txtCargando').classList.add('hidden');
+            if (!exitoso) {
+                alert("El servidor de Render está despertando. Por favor, dale un momento y vuelve a presionar 'Dibujar Lineart'.");
                 document.getElementById('btnProcesar').classList.remove('hidden');
-            } finally {
-                document.getElementById('txtCargando').classList.add('hidden');
             }
         }
 
         async function optimizarCalidadHD() {
             if (!blobActualStencil) return;
             const btn = document.getElementById('btnRenderHD');
-            btn.innerHTML = "🌀 Ejecutando suavizado antialiasing...";
+            btn.innerHTML = "🌀 Refinando...";
             btn.disabled = true;
 
             const formData = new FormData();
@@ -158,15 +145,13 @@
 
             try {
                 const response = await fetch(URL_API_HD, { method: 'POST', body: formData });
-                if (!response.ok) throw new Error("Error");
-
-                blobActualStencil = await response.blob();
-                document.getElementById('imgStencil').src = URL.createObjectURL(blobActualStencil);
-                btn.innerHTML = "✅ Trazado Estilizado Perfecto";
-                btn.classList.replace('bg-purple-600', 'bg-indigo-700');
+                if (response.ok) {
+                    blobActualStencil = await response.blob();
+                    document.getElementById('imgStencil').src = URL.createObjectURL(blobActualStencil);
+                    btn.innerHTML = "✅ Trazado Listo";
+                }
             } catch (e) {
-                alert("No se pudo completar el refinado.");
-                btn.innerHTML = "✨ Pulir Bordes y Definir Curvas";
+                btn.innerHTML = "✨ Limpiar Trazado Definitivo";
                 btn.disabled = false;
             }
         }
@@ -194,25 +179,13 @@
 
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
-            
             const tempImg = new Image();
             tempImg.src = img.src;
             tempImg.onload = function() {
                 canvas.width = tempImg.naturalWidth;
                 canvas.height = tempImg.naturalHeight;
-
                 ctx.fillStyle = 'white';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-                const tamañoLogo = canvas.width * 0.35; 
-                const x = (canvas.width - tamañoLogo) / 2;
-                const y = (canvas.height - (tamañoLogo * 1.25)) / 2;
-                
-                ctx.save();
-                ctx.globalAlpha = 0.03;
-                ctx.drawImage(logoSvgGlobal, x, y, tamañoLogo, tamañoLogo * 1.25);
-                ctx.restore();
-
                 ctx.drawImage(tempImg, 0, 0);
 
                 if (colorActual !== 'black') {
@@ -228,7 +201,7 @@
                 const dataUrl = canvas.toDataURL('image/jpeg', 0.98);
                 const enlace = document.createElement('a');
                 enlace.href = dataUrl;
-                enlace.download = 'stencil-estilógrafo-pro.jpg';
+                enlace.download = 'stencil-procreate.jpg';
                 document.body.appendChild(enlace);
                 enlace.click();
                 document.body.removeChild(enlace);
