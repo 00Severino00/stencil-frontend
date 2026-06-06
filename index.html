@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tattoo Line-Art Pro</title>
+    <title>Tattoo Line-Art Pro V3</title>
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
     <style>
         .image-container { position: relative; width: 100%; max-width: 500px; height: 500px; background-color: white; }
@@ -15,7 +15,7 @@
 
     <div class="w-full max-w-xl bg-gray-800 p-6 rounded-2xl shadow-xl text-center">
         <h1 class="text-3xl font-black mb-2 text-yellow-400">TATTOO LINE-ART PRO</h1>
-        <p class="text-gray-400 text-sm mb-6">Calibración de Estilógrafo Técnico Profesional</p>
+        <p class="text-gray-400 text-sm mb-6">Aislamiento de Líneas Técnicas Anti-Ruido</p>
 
         <div class="mb-6">
             <label class="block w-full border-2 border-dashed border-gray-600 hover:border-yellow-400 rounded-xl p-8 cursor-pointer transition">
@@ -26,18 +26,18 @@
 
         <div id="toleranceControl" class="mb-6 bg-gray-950 p-4 rounded-xl border border-gray-700 hidden">
             <div class="flex justify-between text-xs font-bold text-gray-400 mb-2">
-                <span>PINCEL FINO (0.2mm)</span>
-                <span>GROSOR DEL TRAZO: <span id="valTolerancia">15</span></span>
-                <span>PINCEL GRUESO (0.8mm)</span>
+                <span>TRAZO FINO LIMPIO</span>
+                <span>GROSOR DE LÍNEA: <span id="valTolerancia">25</span></span>
+                <span>TRAZO FUERTE SÓLIDO</span>
             </div>
-            <input type="range" id="toleranceSlider" min="5" max="45" step="2" value="15" onchange="siCambiaTolerancia()" class="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer">
+            <input type="range" id="toleranceSlider" min="11" max="45" step="2" value="25" onchange="siCambiaTolerancia()" class="w-full h-2 bg-gray-800 rounded-lg appearance-none cursor-pointer">
         </div>
 
         <button id="btnProcesar" onclick="procesarStencil()" class="w-full bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-3 px-6 rounded-xl transition hidden">
-            Generar Calco Limpio 🖋️
+            Generar Calco de Precisión 🖋️
         </button>
 
-        <p id="txtCargando" class="text-yellow-400 font-semibold hidden animate-pulse">Procesando vectores y estilizando líneas...</p>
+        <p id="txtCargando" class="text-yellow-400 font-semibold hidden animate-pulse">Filtrando texturas y aislando contornos artísticos...</p>
 
         <div id="editorArea" class="mt-8 hidden text-left">
             <div class="mb-6 text-center">
@@ -117,7 +117,7 @@
                 cambiarColor(colorActual);
                 cambiarOpacidad(0);
             } catch (error) {
-                alert("El servidor se está reiniciando tras el colapso anterior. Dale 10 segundos y vuelve a presionar el botón.");
+                alert("Error de respuesta. Si cambiaste de código, espera unos segundos a que Render termine de compilar la nueva versión.");
                 document.getElementById('btnProcesar').classList.remove('hidden');
             } finally {
                 document.getElementById('txtCargando').classList.add('hidden');
@@ -127,7 +127,7 @@
         async function optimizarCalidadHD() {
             if (!blobActualStencil) return;
             const btn = document.getElementById('btnRenderHD');
-            btn.innerHTML = "🌀 Suavizando bordes artísticos...";
+            btn.innerHTML = "🌀 Suavizando trazos vectoriales...";
             btn.disabled = true;
 
             const formData = new FormData();
@@ -150,6 +150,7 @@
             document.getElementById('imgOriginal').style.opacity = valor / 100;
         }
 
+        // Sistema dinámico de renderizado de color para tintas de calco
         function cambiarColor(color) {
             colorActual = color;
             const tint = document.getElementById('tintLayer');
